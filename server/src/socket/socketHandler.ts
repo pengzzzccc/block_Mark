@@ -124,8 +124,14 @@ export function registerSocketHandlers(io: TypedServer): void {
                 }
             }
 
-            // Start first turn
+            // Start first turn — auto roll dice
             const turnResult = startTurn(gameState);
+            room.gameState = turnResult.game;
+            // Emit dice result to the first player
+            const firstPlayerSocket = io.sockets.sockets.get(room.players[0].id);
+            if (firstPlayerSocket) {
+                firstPlayerSocket.emit('turn:diceResult', turnResult.incomeResult);
+            }
             broadcastGameUpdate(io, room.roomId, turnResult.game);
         });
 
@@ -134,8 +140,10 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!roomId) return;
             const room = getRoom(roomId);
             if (!room?.gameState) return;
+            if (room.gameState.phase !== 'settlement') return;
 
             const turnResult = startTurn(room.gameState);
+            room.gameState = turnResult.game;
             socket.emit('turn:diceResult', turnResult.incomeResult);
             broadcastGameUpdate(io, roomId, turnResult.game);
         });
@@ -145,14 +153,15 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!roomId) return;
             const room = getRoom(roomId);
             if (!room?.gameState) return;
+            if (room.gameState.phase !== 'action') return;
 
             const result = executeBuy(room.gameState, socket.id, {
                 blockId: data.blockId,
                 source: data.source,
             });
+            room.gameState = result.game;
             socket.emit('turn:actionResult', { success: result.success, message: result.message });
             broadcastGameUpdate(io, roomId, result.game);
-
             handlePostAction(io, roomId, result.game);
         });
 
@@ -161,14 +170,15 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!roomId) return;
             const room = getRoom(roomId);
             if (!room?.gameState) return;
+            if (room.gameState.phase !== 'action') return;
 
             const result = executeSwap(room.gameState, socket.id, {
                 sellBlockId: data.sellBlockId,
                 buyBlockId: data.buyBlockId,
             });
+            room.gameState = result.game;
             socket.emit('turn:actionResult', { success: result.success, message: result.message });
             broadcastGameUpdate(io, roomId, result.game);
-
             handlePostAction(io, roomId, result.game);
         });
 
@@ -177,6 +187,7 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!roomId) return;
             const room = getRoom(roomId);
             if (!room?.gameState) return;
+            if (room.gameState.phase !== 'action') return;
 
             const result = initiateNegotiation(room.gameState, socket.id, {
                 targetPlayerId: data.targetPlayerId,
@@ -185,9 +196,9 @@ export function registerSocketHandlers(io: TypedServer): void {
                 cashOffered: data.cashOffered,
                 cashRequested: data.cashRequested,
             });
+            room.gameState = result.game;
 
-            if (!result.success && result.game.negotiation) {
-                // Negotiation created — notify target
+            if (result.success && result.game.negotiation) {
                 const targetSocket = io.sockets.sockets.get(data.targetPlayerId);
                 if (targetSocket) {
                     targetSocket.emit('negotiate:request', result.game.negotiation);
@@ -205,8 +216,8 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!room?.gameState) return;
 
             const result = handleNegotiationReply(room.gameState, socket.id, data.accept);
+            room.gameState = result.game;
 
-            // Notify both players of the outcome
             const offer = room.gameState.negotiation;
             if (offer) {
                 const fromSocket = io.sockets.sockets.get(offer.fromPlayerId);
@@ -224,11 +235,13 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!roomId) return;
             const room = getRoom(roomId);
             if (!room?.gameState) return;
+            if (room.gameState.phase !== 'action') return;
 
             const result = initiateForcedTrade(room.gameState, socket.id, {
                 targetPlayerId: data.targetPlayerId,
                 targetBlockId: data.targetBlockId,
             });
+            room.gameState = result.game;
 
             socket.emit('turn:actionResult', { success: result.success, message: result.message });
 
@@ -247,8 +260,8 @@ export function registerSocketHandlers(io: TypedServer): void {
 
             const duelResult = rollDuelAction(room.gameState);
             if (!duelResult) return;
+            room.gameState = duelResult.game;
 
-            // Build DuelDiceResult for client
             const duelState = duelResult.result;
             const diceResult: DuelDiceResult = {
                 attacker: duelState.result?.attackerRoll
@@ -266,13 +279,12 @@ export function registerSocketHandlers(io: TypedServer): void {
             io.to(roomId).emit('duel:rolled', diceResult);
 
             const resolved = resolveDuel(duelResult.game);
+            room.gameState = resolved.game;
+
             if (resolved.success) {
-                // Find the transferred block info from the game state
                 const defender = resolved.game.players.find((p) => p.id === duelState.defenderId);
                 const attacker = resolved.game.players.find((p) => p.id === duelState.attackerId);
-                // The target block was the one we were fighting over
                 const targetBlockId = duelState.targetBlockId;
-                // Check where it ended up
                 const defenderHasBlock = defender?.hand.some((b) => b.id === targetBlockId) ?? false;
                 const winnerId = duelState.result?.winnerId ?? '';
                 const blockTransferred = attacker?.hand.find((b) => b.id === targetBlockId) ?? defender?.hand.find((b) => b.id === targetBlockId);
@@ -296,6 +308,7 @@ export function registerSocketHandlers(io: TypedServer): void {
             if (!room?.gameState) return;
 
             const updated = advanceToNextPlayer(room.gameState);
+            room.gameState = updated;
             broadcastGameUpdate(io, roomId, updated);
         });
 
@@ -374,7 +387,9 @@ function handlePostAction(io: TypedServer, roomId: string, gameState: GameState)
         return;
     }
 
-    // Advance to next player
+    // Advance to next player and write back to room
     const nextState = advanceToNextPlayer(gameState);
+    const room = getRoom(roomId);
+    if (room) room.gameState = nextState;
     broadcastGameUpdate(io, roomId, nextState);
 }

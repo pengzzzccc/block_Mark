@@ -1,4 +1,4 @@
-import type { Block, BlockColor, OrdinalNumber } from '@shared/types.js';
+import type { Block, BlockColor, OrdinalNumber } from '../../shared/types.js';
 import { v4 as uuidv4 } from 'uuid';
 
 /** Block color combos for ordinal blocks */

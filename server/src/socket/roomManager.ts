@@ -1,4 +1,4 @@
-import type { PlayerState, RoomState, GameState, Block, BlockColor, BlockCategory } from '@shared/types.js';
+import type { PlayerState, RoomState, GameState, Block, BlockColor, BlockCategory } from '../../shared/types.js';
 import type { Server, Socket } from 'socket.io';
 import { initBlockPool, setupOpenMarket } from '../game/blocks.js';
 import {

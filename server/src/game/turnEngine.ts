@@ -6,7 +6,7 @@ import type {
     BuySource,
     DuelState,
     NegotiationOffer,
-} from '@shared/types.js';
+} from '../../shared/types.js';
 import { rollForIncome } from './dice.js';
 import { buyFromMarket, blindDraw, BLIND_DRAW_COST, SWAP_SELL_PRICE } from './blocks.js';
 import { checkWinCondition } from './winCheck.js';

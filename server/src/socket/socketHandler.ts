@@ -341,6 +341,7 @@ function buildClientGameState(gameState: GameState, playerId: string): ClientGam
         negotiation: sanitized.negotiation,
         winnerId: sanitized.winnerId,
         turnDeadline: sanitized.turnDeadline,
+        extraAction: sanitized.extraAction,
     };
 }
 

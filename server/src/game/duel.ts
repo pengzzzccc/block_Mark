@@ -90,11 +90,12 @@ export function applyDuelResult(
             attacker: { ...attacker, hand: [...attacker.hand] },
             defender: { ...defender, hand: [...defender.hand] },
             blockTransferred: block,
-            cashTransferred: 0, // wager already deducted, goes to bank
+            cashTransferred: 0,
             winnerId,
         };
     } else {
-        // Defender wins: keeps block, gets the wager
+        // Defender wins: keeps block + gets the wager from bank
+        defender.hand.push(block);
         defender.cash += wager;
         return {
             attacker: { ...attacker },

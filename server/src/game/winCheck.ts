@@ -172,13 +172,6 @@ function removePairFromBlocks(
 function findTwoSets(nonWilds: Block[], wilds: Block[]): DetectedSet[] | null {
     const nonWildOrdinals = nonWilds.filter((b) => b.category === 'ordinal');
 
-    // Try rainbow first (4 blocks, same number, different colors)
-    const rainbowResult = tryRainbow(nonWildOrdinals, wilds);
-    if (rainbowResult) {
-        // Rainbow = 2 sets, consumes at most 4 non-wilds (or 3 non-wilds + 1 wild)
-        return rainbowResult;
-    }
-
     // Try forming first set, then check if remaining can form second set
     const possibleFirstSets = generateAllPossibleSets(nonWildOrdinals, wilds.length);
 

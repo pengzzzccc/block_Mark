@@ -36,6 +36,7 @@ export function startTurn(game: GameState): { game: GameState; incomeResult: Inc
         currentAction: null,
         duelState: null,
         negotiation: null,
+        extraAction: incomeResult.isDouble6,
     };
 
     return { game: updated, incomeResult };
@@ -58,22 +59,27 @@ export function executeBuy(
     const player = { ...game.players[playerIndex] };
     let block: Block;
     let cost: number;
+    let openMarket = [...game.openMarket];
+    let blindPile = [...game.blindPile];
 
     // Determine block and cost based on source
     if (buyData.source === 'blindDraw') {
-        const drawResult = blindDraw([...game.blindPile]);
+        const drawResult = blindDraw(blindPile);
         if (!drawResult) {
             return { game, success: false, message: '盲抽堆已空' };
         }
         block = drawResult.block;
+        blindPile = drawResult.blindPile;
         cost = BLIND_DRAW_COST;
     } else {
-        const blockInMarket = game.openMarket.find((b) => b.id === buyData.blockId);
-        if (!blockInMarket) {
+        const marketResult = buyFromMarket(openMarket, blindPile, buyData.blockId);
+        if (!marketResult) {
             return { game, success: false, message: '该方块不在公开市场' };
         }
-        cost = blockInMarket.basePrice;
-        // block will be assigned via buyFromMarket below
+        block = marketResult.block;
+        openMarket = marketResult.openMarket;
+        blindPile = marketResult.blindPile;
+        cost = block.basePrice;
     }
 
     if (player.cash < cost) {
@@ -81,26 +87,6 @@ export function executeBuy(
     }
 
     player.cash -= cost;
-
-    let openMarket = [...game.openMarket];
-    let blindPile = [...game.blindPile];
-
-    if (buyData.source === 'blindDraw') {
-        const drawResult = blindDraw(blindPile);
-        if (!drawResult) {
-            return { game, success: false, message: '盲抽失败' };
-        }
-        block = drawResult.block;
-        blindPile = drawResult.blindPile;
-    } else {
-        const marketResult = buyFromMarket(openMarket, blindPile, buyData.blockId);
-        if (!marketResult) {
-            return { game, success: false, message: '购买失败' };
-        }
-        block = marketResult.block;
-        openMarket = marketResult.openMarket;
-        blindPile = marketResult.blindPile;
-    }
 
     player.hand = [...player.hand, block];
 
@@ -422,6 +408,19 @@ export function resolveDuel(game: GameState): { game: GameState; success: boolea
  * Skips disconnected players.
  */
 export function advanceToNextPlayer(game: GameState): GameState {
+    // 双6 额外行动：当前玩家再来一轮（不切人）
+    if (game.extraAction) {
+        return {
+            ...game,
+            extraAction: false,
+            phase: 'settlement',
+            currentAction: null,
+            duelState: null,
+            negotiation: null,
+            diceResult: null,
+        };
+    }
+
     const numPlayers = game.players.length;
     let nextIndex = (game.currentPlayerIndex + 1) % numPlayers;
     let attempts = 0;
@@ -449,5 +448,6 @@ export function advanceToNextPlayer(game: GameState): GameState {
         duelState: null,
         negotiation: null,
         diceResult: null,
+        extraAction: false,
     };
 }

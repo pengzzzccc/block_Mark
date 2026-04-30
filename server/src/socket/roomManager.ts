@@ -104,6 +104,7 @@ export function startGame(roomId: string, playerId: string): { room: RoomState; 
         duelState: null,
         negotiation: null,
         turnDeadline: null,
+        extraAction: false,
     };
 
     room.gameState = gameState;

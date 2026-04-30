@@ -33,7 +33,7 @@ export function calculateIncome(dice: DiceResult): { income: number; isDouble6: 
         income = baseIncome;
     } else if (green >= 3 && green <= 7) {
         // Round to nearest half-10 (.5)
-        income = green === 3 ? baseIncome + 5 : baseIncome + 5;
+        income = baseIncome + 5;
     } else {
         // green >= 8 → round up to next 10
         income = baseIncome + 10;

@@ -134,6 +134,7 @@ export interface GameState {
     negotiation: NegotiationOffer | null;
     winnerId: string | null;
     turnDeadline: number | null;
+    extraAction: boolean; // 双6额外行动标记
 }
 
 export interface RoomState {
@@ -207,4 +208,5 @@ export interface ClientGameState {
     negotiation: NegotiationOffer | null;
     winnerId: string | null;
     turnDeadline: number | null;
+    extraAction: boolean;
 }

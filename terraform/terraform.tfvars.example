@@ -1,0 +1,6 @@
+# 复制此文件为 terraform.tfvars 并填入实际值
+# cp terraform.tfvars.example terraform.tfvars
+
+key_pair_name = "your-keypair-name"   # AWS EC2 → Key Pairs → 密钥对名称
+admin_ip      = "1.2.3.4/32"          # 你的公网 IP（curl -s https://api.ipify.org）
+repo_url      = "https://github.com/your-username/block_Mark.git"

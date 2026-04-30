@@ -1,1 +1,11 @@
 node_modules
+
+# Terraform
+*.tfvars
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# Build output
+dist/

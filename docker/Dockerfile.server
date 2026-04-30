@@ -15,4 +15,4 @@ RUN npm ci --omit=dev --workspace=server
 COPY --from=build /app/server/dist/ ./dist/
 COPY --from=build /app/shared/ ./shared/
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
+CMD ["node", "dist/server/src/index.js"]

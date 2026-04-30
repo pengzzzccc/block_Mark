@@ -2,6 +2,22 @@ provider "aws" {
   region = var.aws_region
 }
 
+# 自动查找最新 Ubuntu 24.04 LTS AMI（无需硬编码）
+data "aws_ami" "ubuntu" {
+  most_recent = true
+  owners      = ["099720109477"] # Canonical 官方账号
+
+  filter {
+    name   = "name"
+    values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
+  }
+
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+}
+
 data "aws_vpc" "default" {
   default = true
 }
@@ -51,9 +67,10 @@ resource "aws_security_group" "block_market" {
 }
 
 resource "aws_instance" "block_market" {
-  ami                    = var.ami_id
+  ami                    = data.aws_ami.ubuntu.id
   instance_type          = var.instance_type
   key_name               = var.key_pair_name
+  subnet_id              = data.aws_subnets.default.ids[0]
   vpc_security_group_ids = [aws_security_group.block_market.id]
 
   root_block_device {

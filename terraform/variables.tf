@@ -1,23 +1,24 @@
 variable "aws_region" {
-  default = "ap-southeast-2"
+  description = "AWS 区域"
+  default     = "ap-southeast-2"
 }
 
 variable "instance_type" {
-  default = "t3.small"
-}
-
-variable "ami_id" {
-  default = "ami-0c2ab3b8efb09f272"
+  description = "EC2 实例类型"
+  default     = "t3.micro" # 免费套餐适用
 }
 
 variable "key_pair_name" {
-  type = string
+  description = "SSH 密钥对名称（AWS EC2 → Key Pairs）"
+  type        = string
 }
 
 variable "admin_ip" {
-  type = string
+  description = "SSH 白名单 IP（curl -s https://api.ipify.org）"
+  type        = string
 }
 
 variable "repo_url" {
-  type = string
+  description = "GitHub 仓库地址（EC2 启动时自动克隆部署）"
+  type        = string
 }

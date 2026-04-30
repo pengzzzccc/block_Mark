@@ -109,7 +109,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
         if (get().socket?.connected) return;
 
         set({ connecting: true });
-        const socket = io('http://localhost:3001', {
+        // 开发环境直连 server:3001，生产环境通过 nginx 代理
+        const isDev = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+        const socketUrl = isDev ? 'http://localhost:3001' : window.location.origin;
+        const socket = io(socketUrl, {
             transports: ['websocket', 'polling'],
             reconnection: true,
             reconnectionAttempts: 10,

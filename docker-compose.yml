@@ -18,7 +18,6 @@ services:
     environment:
       - REDIS_URL=redis://redis:6379
       - NODE_ENV=production
-      - CORS_ORIGIN=http://localhost
     depends_on:
       - redis
 

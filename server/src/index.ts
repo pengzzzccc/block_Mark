@@ -6,7 +6,7 @@ import type { ClientToServerEvents, ServerToClientEvents } from '../../shared/ty
 import { registerSocketHandlers } from './socket/socketHandler.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
-const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
+const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 
 const app = express();
 app.use(cors({ origin: CORS_ORIGIN }));

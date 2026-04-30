@@ -14,6 +14,7 @@
         "noUnusedParameters": false,
         "noFallthroughCasesInSwitch": true,
         "baseUrl": ".",
+        "rootDir": "src",
         "paths": {
             "@shared/*": [
                 "../shared/*"
@@ -21,7 +22,6 @@
         }
     },
     "include": [
-        "src",
-        "../shared"
+        "src"
     ]
 }

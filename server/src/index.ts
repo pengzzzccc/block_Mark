@@ -2,6 +2,8 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import type { ClientToServerEvents, ServerToClientEvents } from '../../shared/types.js';
+import { registerSocketHandlers } from './socket/socketHandler.js';
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT) : 3001;
 const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
@@ -17,20 +19,14 @@ app.get('/api/health', (_req, res) => {
 
 const httpServer = createServer(app);
 
-const io = new Server(httpServer, {
+const io = new Server<ClientToServerEvents, ServerToClientEvents>(httpServer, {
     cors: {
         origin: CORS_ORIGIN,
         methods: ['GET', 'POST'],
     },
 });
 
-io.on('connection', (socket) => {
-    console.log(`[Socket] Client connected: ${socket.id}`);
-
-    socket.on('disconnect', (reason) => {
-        console.log(`[Socket] Client disconnected: ${socket.id}, reason: ${reason}`);
-    });
-});
+registerSocketHandlers(io);
 
 httpServer.listen(PORT, () => {
     console.log(`[Server] Block Market server running on port ${PORT}`);

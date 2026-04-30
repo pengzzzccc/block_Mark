@@ -1,4 +1,4 @@
-import type { Block, DuelState, PlayerState } from '../../shared/types.js';
+import type { Block, DuelState, PlayerState } from '../../../shared/types.js';
 import { rollForDuel } from './dice.js';
 
 /**

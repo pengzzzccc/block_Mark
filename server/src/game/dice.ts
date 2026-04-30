@@ -1,4 +1,4 @@
-import type { DiceResult, IncomeResult } from '../../shared/types.js';
+import type { DiceResult, IncomeResult } from '../../../shared/types.js';
 
 /**
  * Roll two dice: Red (1-6) and Green (1-6)

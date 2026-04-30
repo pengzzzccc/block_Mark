@@ -8,7 +8,7 @@ import type {
     RoomState,
     DuelState,
     DuelDiceResult,
-} from '../../shared/types.js';
+} from '../../../shared/types.js';
 import {
     createRoom,
     joinRoom,

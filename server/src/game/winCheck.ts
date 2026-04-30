@@ -1,4 +1,4 @@
-import type { Block, BlockColor, OrdinalNumber, WinResult, DetectedSet, DetectedPair } from '../../shared/types.js';
+import type { Block, BlockColor, OrdinalNumber, WinResult, DetectedSet, DetectedPair } from '../../../shared/types.js';
 
 // ---------------------------------------------------------------
 // Victory Check — Mahjong-style hand evaluation (recursive)
